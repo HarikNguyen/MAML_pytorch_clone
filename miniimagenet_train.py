@@ -46,7 +46,8 @@ def main():
         ('linear', [args.n_way, 32 * 5 * 5])
     ]
 
-    device = torch.device('cuda')
+    # device = torch.device('cuda')
+    device = torch.device('cpu')
     maml = Meta(args, config).to(device)
 
     tmp = filter(lambda x: x.requires_grad, maml.parameters())
@@ -55,16 +56,16 @@ def main():
     print('Total trainable tensors:', num)
 
     # batchsz here means total episode number
-    mini = MiniImagenet('/home/i/tmp/MAML-Pytorch/miniimagenet/', mode='train', n_way=args.n_way, k_shot=args.k_spt,
+    mini = MiniImagenet('miniimagenet/', mode='train', n_way=args.n_way, k_shot=args.k_spt,
                         k_query=args.k_qry,
                         batchsz=10000, resize=args.imgsz)
-    mini_test = MiniImagenet('/home/i/tmp/MAML-Pytorch/miniimagenet/', mode='test', n_way=args.n_way, k_shot=args.k_spt,
+    mini_test = MiniImagenet('miniimagenet/', mode='test', n_way=args.n_way, k_shot=args.k_spt,
                              k_query=args.k_qry,
                              batchsz=100, resize=args.imgsz)
 
     for epoch in range(args.epoch//10000):
         # fetch meta_batchsz num of episode each time
-        db = DataLoader(mini, args.task_num, shuffle=True, num_workers=1, pin_memory=True)
+        db = DataLoader(mini, args.task_num, shuffle=True, num_workers=4, pin_memory=True)
 
         for step, (x_spt, y_spt, x_qry, y_qry) in enumerate(db):
 
